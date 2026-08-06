@@ -1,0 +1,26 @@
+{
+  "name": "automacao-com-api-rest",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000A\u0000u\u0000t\u0000o\u0000m\u0000a\u0000-\u0000o\u0000-\u0000c\u0000o\u0000m\u0000-\u0000A\u0000P\u0000I\u0000-\u0000R\u0000E\u0000S\u0000T\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joaogadev/Automa-o-com-API-REST.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/joaogadev/Automa-o-com-API-REST/issues"
+  },
+  "homepage": "https://github.com/joaogadev/Automa-o-com-API-REST#readme",
+  "dependencies": {
+    "csv-parse": "^7.0.2",
+    "csv-parser": "^3.2.1",
+    "express": "^5.2.1"
+  }
+}

@@ -153,7 +153,7 @@ async function criarJsonFinal() {
         }
 
         const final = fs.writeFileSync(
-            "posicionamento.json",
+            "provisionamento.json",
             JSON.stringify(resultado, null, 2),
             "utf8"
         );
@@ -181,8 +181,6 @@ async function main() {
     console.log("Total de objetos processados com sucesso:", objetosTotais - objetosComErro + "\n");
     console.log("Total de objetos com erro:", objetosComErro + "\n");
     console.log("Erros encontrados:", erros);
-
-    setInterval(resultado, 60);
 }
 
 main();

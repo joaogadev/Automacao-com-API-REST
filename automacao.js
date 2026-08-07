@@ -219,4 +219,9 @@ async function main() {
     }
 }
 
-main();
+async function iniciarAutomacao() {
+    await main();
+}
+
+iniciarAutomacao();
+setInterval(iniciarAutomacao, 60 * 1000); // Executa a cada 1 minuto

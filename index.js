@@ -25,20 +25,32 @@ function escreverJson(caminhoArquivo) {
     }
 }
 
-function lerJson(caminhoArquivo) {
+async function buscarRegistroPorCep(cepBuscado) {
     try {
-        const jsonData = fs.readFileSync(caminhoArquivo, "utf8");
+        
+        let data = escreverJson("consulta.csv");
 
-        const json = JSON.parse(jsonData);
+        let cep = data.find(
+            item => item.cep.trim() == String(cepBuscado).trim()
+        );
+        
+        if (!cep) {
+            console.error("CEP não encontrado.");
+            return;
+        }
 
-        let url = "https://viacep.com.br/ws/{json.cep}/json/"
+        let url = `https://viacep.com.br/ws/${cepBuscado}/json/`;
+
+        return await fetch(url).then(resp => resp.json());
+
     } catch (err) {
-        console.error("Não foi possível ler o arquivo JSON:", err.message);
+        console.error("Não foi possível buscar o registro por CEP:", err.message);
     }
 }
 
-function main() {
-    escreverJson("consulta.csv");
+async function main() {
+    let cep = "49010-390";
+    console.log(await criarJsonFinal(cep));
 }
 
 main();

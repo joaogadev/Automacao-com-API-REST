@@ -203,6 +203,9 @@ async function enviarWebHook(resultado) {
 
 async function main() {
     try {
+        objetosTotais = 0;
+        objetosComErro = 0;
+        erros.length = 0;
         const resultado = await criarJsonFinal();
         fs.writeFileSync(
             "erros.json",
@@ -219,4 +222,9 @@ async function main() {
     }
 }
 
-main();
+async function iniciarAutomacao() {
+    await main();
+}
+
+iniciarAutomacao();
+setInterval(iniciarAutomacao, 60 * 1000); // Executa a cada 1 minuto

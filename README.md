@@ -1,7 +1,11 @@
 # Automação com API REST
 
 ## Sobre o Projeto
-Projeto de automacao com o objetivo de carrega os dados de um CSV, transforma-los em JSON, trata-los, consumir uma api publica, utilizar os dados desejados nela e adiciona-los em um novo JSON com os novos dados da API pública junto dos dados desejados do antigo CSV.
+Este projeto consiste em um script de automação desenvolvido para processar e enriquecer dados de forma automatizada.
+
+O script realiza a leitura dos dados de um arquivo CSV, transforma-os e trata essas informações em formato JSON. Em seguida, consome uma API pública para obter dados adicionais. As informações relevantes retornadas pela API são combinadas com os dados originais, gerando um novo arquivo JSON com os dados consolidados.
+
+O objetivo dessa automação é reduzir tarefas manuais e repetitivas relacionadas à consulta.
 
 ## Fluxo de Processamento dos Dados
 

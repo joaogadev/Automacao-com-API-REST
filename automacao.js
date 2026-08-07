@@ -47,7 +47,6 @@ async function buscarRegistroPorCep(cepBuscado) {
             item => item.cep.trim() == String(cepBuscado).trim()
         );
         
-        objetosComErro = 0;
         if (!cep) {
             objetosComErro++
             console.error("CEP não encontrado.", cepBuscado + "\n");
@@ -133,7 +132,6 @@ async function criarJsonFinal() {
     try {
         const resultado = [];
         const item = await escreverJson("consulta.csv");
-        objetosTotais = 0;
         for (const data of item) {
             objetosTotais++;
             try {
@@ -205,6 +203,9 @@ async function enviarWebHook(resultado) {
 
 async function main() {
     try {
+        objetosTotais = 0;
+        objetosComErro = 0;
+        erros.length = 0;
         const resultado = await criarJsonFinal();
         fs.writeFileSync(
             "erros.json",

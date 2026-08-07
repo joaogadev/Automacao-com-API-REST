@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import { parse } from "csv-parse/sync";
 
+const urlWebHook = "https://webhooktest.net/webhook/019fdcad-3086-7298-b233-8a6c79eb12db";
+
 const erros = [];
 let objetosTotais = 0;
 let objetosComErro = 0;
@@ -170,17 +172,51 @@ async function criarJsonFinal() {
     }
 }
 
+async function enviarWebHook(resultado) {
+    const data = {
+        evento: "processamento_concluido",
+        resumo: {
+            objetosTotais: objetosTotais,
+            objetosComSucesso: objetosTotais - objetosComErro,
+            erros: erros
+        },
+
+        resultado,
+        erros,
+        dataProcessamento: new Date().toISOString()
+    };
+
+    const resposta = await fetch(urlWebHook, {
+        method: "POST",
+
+        header: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(data)
+    });
+
+    if (!resposta.ok) {
+        throw new Error(`Erro ao enviar o webhook: ${resposta.status} - ${resposta.statusText} \n`);
+    }
+}
+
 async function main() {
-    let cep = "49010-390";
-    const resultado = await criarJsonFinal();
-    fs.writeFileSync(
-        "erros.json",
-        JSON.stringify(erros, null, 2),
-        "utf8"  
-    );
-    console.log("Total de objetos processados com sucesso:", objetosTotais - objetosComErro + "\n");
-    console.log("Total de objetos com erro:", objetosComErro + "\n");
-    console.log("Erros encontrados:", erros);
+    try {
+        const resultado = await criarJsonFinal();
+        fs.writeFileSync(
+            "erros.json",
+            JSON.stringify(erros, null, 2),
+            "utf8"  
+        );
+        await enviarWebHook(resultado);
+        console.log("Total de objetos processados com sucesso:", objetosTotais - objetosComErro + "\n");
+        console.log("Total de objetos com erro:", objetosComErro + "\n");
+        console.log("Erros encontrados:", erros);
+    }
+    catch (err) {
+        console.error("Erro no processamento:", err.message + "\n");
+    }
 }
 
 main();

@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import { parse } from "csv-parse/sync";
 
+const erros = [];
+
 function escreverJson(caminhoArquivo) {
     try {
         const arq = fs.readFileSync(caminhoArquivo, "utf8");
@@ -22,6 +24,13 @@ function escreverJson(caminhoArquivo) {
 
     } catch (err) {
         console.error("Não foi possível escrever o arquivo JSON:", err.message);
+
+        erros.push({
+            mensagem: err.message,
+            metodo: "escreverJson"
+        })
+
+        throw err;
     }
 }
 
@@ -36,15 +45,33 @@ async function buscarRegistroPorCep(cepBuscado) {
         
         if (!cep) {
             console.error("CEP não encontrado.");
-            return;
+            throw new Error("CEP não encontrado.");
         }
 
-        let url = `https://viacep.com.br/ws/${cepBuscado}/json/`;
+        let url = await fetch(`https://viacep.com.br/ws/${cepBuscado}/json/`);
 
-        return await fetch(url).then(resp => resp.json());
+        if (!url.ok) {
+            throw new Error(`Erro ao buscar o registro por CEP: ${url.status} - ${url.statusText}`);
+        }
+
+        const dadosCep = await url.json();
+
+        if (dadosCep.erro === "true") {
+            throw new Error("CEP inválido ou não encontrado na API.");
+        }
+
+        return dadosCep;
 
     } catch (err) {
         console.error("Não foi possível buscar o registro por CEP:", err.message);
+
+        erros.push({
+            cep: cepBuscado,
+            mensagem: err.message,
+            metodo: "buscarRegistroPorCep"
+        })
+
+        throw err;
     }
 }
 
@@ -58,27 +85,25 @@ function makeSlug(text) {
         .replace(/\-\-+/g, "-"); //remove hífens duplicados
 }
 
-async function criarJsonFinal(cepBuscado) {
+async function objetoEnriquecido(cepBuscado) {
     try {
         let dataJsonOriginal = escreverJson("consulta.csv");
-
-        let getLogradouro = await buscarRegistroPorCep(cepBuscado).then(data => data.logradouro);
+        let dadosBuscados = await buscarRegistroPorCep(cepBuscado);
+        let getLogradouro = dadosBuscados.logradouro;
 
         console.log(getLogradouro);
 
-        let getBairro = await buscarRegistroPorCep(cepBuscado).then(data => data.bairro);
+        let getBairro = dadosBuscados.bairro;
 
         console.log(getBairro);
 
         const item = dataJsonOriginal.find(
             item => item.cep.trim() === String(cepBuscado).trim()
         );
-
-        const serv = dataJsonOriginal.find(
-            item => item.cep.trim() === String(cepBuscado).trim()
-        ).servicos;
-        
+   
         item.slug = makeSlug(item.nome);
+
+        item.servicos = item.servicos.split(";");
 
         item.endereco = {
             logradouro: getLogradouro,
@@ -92,22 +117,68 @@ async function criarJsonFinal(cepBuscado) {
         delete item.uf;
         delete item.cep;
 
+        return item;
+
+    } catch (err) {
+        console.error("Não foi possível enriquecer o json", cepBuscado, err.message);
+
+        throw err;
+    }
+}
+
+async function criarJsonFinal() {
+    try {
+        const resultado = [];
+        const item = await escreverJson("consulta.csv");
+        for (const data of item) {
+            try {
+                const objeto = await objetoEnriquecido(data.cep);
+
+                console.log(objeto);
+
+                resultado.push(objeto);
+            } catch (err) {
+                console.error(`Erro ao processar o CEP ${data.cep}:`, err.message);
+
+                erros.push({
+                    cep: data.cep,
+                    mensagem: err.message,
+                    metodo: "for do criarJsonFinal"
+                });
+
+                continue;
+            }
+            
+        }
+
         const final = fs.writeFileSync(
             "posicionamento.json",
-            JSON.stringify(dataJsonOriginal, null, 2),
+            JSON.stringify(resultado, null, 2),
             "utf8"
         );
 
         return JSON.parse(fs.readFileSync("posicionamento.json", "utf8"));
 
     } catch (err) {
-        console.error("Não foi possível buscar o registro por logradouro e bairro:", err.message);
+        console.error("Não foi possível criar o JSON final:", err.message);
+
+        erros.push({
+            mensagem: err.message,
+            metodo: "criarJsonFinal"
+        });
     }
 }
 
 async function main() {
     let cep = "49010-390";
-    console.log(await criarJsonFinal(cep));
+    const resultado = await criarJsonFinal();
+    console.log(resultado);
+    fs.writeFileSync(
+        "erros.json",
+        JSON.stringify(erros, null, 2),
+        "utf8"  
+    );
+    console.log("Erros encontrados:", erros);
 }
 
 main();

@@ -7,6 +7,20 @@ O script realiza a leitura dos dados de um arquivo CSV, transforma-os e trata es
 
 O objetivo dessa automação é reduzir tarefas manuais e repetitivas relacionadas à consulta.
 
+## Decisões técnicas
+ - A biblioteca `csv-parse` foi utilizada para realizar a leitura e conversão dos dados do CSV.
+ - OS erros são registrados separadamente no arquivo `erros.json`.
+ - Os registros são processados individualmente para que falhas em um cep não interrompa todo o processamento.
+ - A automação é executada a cada 1 minuto utilizando o `setInverval`.
+ - O webhook é enviado após cada ciclo de processamento para simular uma notificação ao time.
+
+## Limitações Conhecidas
+ - A automação depende da disponibilidade da API ViaCep
+ - Caso a `consulta.csv` não existir ou estiver impossível de ler, o `escreverJson()` lança erro e aí não existe uma “próxima unidade” para continuar, porque o script nem conseguiu carregar a lista.
+ - O formato das colunas do csv deve seguir o esperado pelo script.
+ - O processamento dos CEPs é sequencial, portanto arquivos muito grandes podem aumentar o tempo de execução.
+ - O arquivo `consulta.csv` deve estar no diretório raiz do projeto.
+
 ## Fluxo de Processamento dos Dados
 
 ```mermaid
@@ -19,7 +33,8 @@ flowchart TD
     F --> G[Cria o envio do webhook]
     G --> H[Envia o webhook]
     H --> I[Gera relatórios no terminal]
-    I --> J[Inicia automação com petodo post no webhook a cada 1 minuto]
+    I --> J[Aguarda 1 Minuto]
+    J --> A
 ```
 
 ## Tecnologias Utilizadas
@@ -28,7 +43,7 @@ flowchart TD
  - JSON
  - Webhook
 
-## Como Utiliza-lo
+## Como utilizá-lo
 
 Caso não tenha o node baixado será necessário baixar no link abaixo
 ```
@@ -42,7 +57,7 @@ Para a solução funcionar será necessário conferir se o ```type``` está sele
 ```
 "type": "module"
 ```
-Após clonar, abra o reporitório e utilizie os seguintes comando:
+Após clonar, abra o repositório e utilize os seguintes comando:
 ```
 npm install
 ```
@@ -57,8 +72,8 @@ para acompanhar os dados tratados da automação. Para fazer isso, acesse o site
 ```
 Create Webhook endpoint
 ```
-Copie o Webhoo endpoint
-No código ```automacao.js``` altere o link posto pelo seu lisk copiado
+Copie o Webhook endpoint
+No código ```automacao.js``` altere o link posto pelo seu link copiado
 Confira se o ```consulta.csv``` está localizado no mesmo local do ```automacao.js```, caso não esteja, coloque-o.
 Após finalizar esse passo a passo, abra o terminal e insira o comando
 ```

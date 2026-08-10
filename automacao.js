@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { parse } from "csv-parse/sync";
 
-const urlWebHook = "https://webhooktest.net/webhook/019fdcad-3086-7298-b233-8a6c79eb12db";
+const urlWebHook = "https://webhooktest.net/webhook/019fec35-c936-7649-9aef-d5d140763639";
 
 const erros = [];
 let objetosTotais = 0;
@@ -178,18 +178,16 @@ async function enviarWebHook(resultado) {
         resumo: {
             objetosTotais: objetosTotais,
             objetosComSucesso: objetosTotais - objetosComErro,
-            erros: erros
+            objetosComErro,
+            erros
         },
-
-        resultado,
-        erros,
         dataProcessamento: new Date().toISOString()
     };
 
     const resposta = await fetch(urlWebHook, {
         method: "POST",
 
-        header: {
+        headers: {
             "Content-Type": "application/json"
         },
 
@@ -227,4 +225,4 @@ async function iniciarAutomacao() {
 }
 
 iniciarAutomacao();
-setInterval(iniciarAutomacao, 60 * 1000); // Executa a cada 1 minuto
+setInterval(iniciarAutomacao, 60 * 1000); // Executa a cada 1 minuto (pode ser alterado conforme necessário)
